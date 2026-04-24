@@ -1,0 +1,23 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgis/postgis:15-3.4
+    container_name: tfinder-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tfinder
+      POSTGRES_PASSWORD: tfinder_dev_password
+      POSTGRES_DB: tfinder
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tfinder"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
