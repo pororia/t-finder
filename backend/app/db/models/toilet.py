@@ -29,7 +29,7 @@ class Toilet(Base):
     is_accessible = Column(Boolean, nullable=False, default=False)
     seat_count = Column(SmallInteger, nullable=False, default=0)
     urinal_count = Column(SmallInteger, nullable=False, default=0)
-    payment_type = Column(Enum(PaymentType), nullable=False, default=PaymentType.FREE)
+    payment_type = Column(Enum(PaymentType, name="payment_type", create_type=False), nullable=False, default=PaymentType.FREE)
     cost = Column(Integer, nullable=True)
     created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     is_deleted = Column(Boolean, nullable=False, default=False)

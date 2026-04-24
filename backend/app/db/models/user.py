@@ -20,7 +20,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     nickname = Column(String(50), nullable=False)
     profile_image_url = Column(String, nullable=True)
-    role = Column(Enum(UserRole), nullable=False, default=UserRole.USER)
+    role = Column(Enum(UserRole, name="user_role", create_type=False), nullable=False, default=UserRole.USER)
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
