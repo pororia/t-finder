@@ -5,5 +5,24 @@ runConfig:
   cpu: 1
   memoryMiB: 512
 
-# 환경 변수는 Firebase App Hosting 콘솔에서 직접 관리
-# Console: Firebase > App Hosting > 백엔드 > 환경 변수
+env:
+  - variable: NEXT_PUBLIC_API_BASE_URL
+    value: https://tfinder-backend-848358983898.us-central1.run.app/v1
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: t-finder-10310.firebaseapp.com
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: t-finder-10310
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: t-finder-10310.firebasestorage.app
+    availability:
+      - BUILD
+      - RUNTIME
