@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import toast from 'react-hot-toast';
@@ -23,10 +23,11 @@ export default function NewToiletPage() {
     libraries,
   });
 
-  if (!user) {
-    router.push('/login');
-    return null;
-  }
+  useEffect(() => {
+    if (!user) router.push('/login');
+  }, [user, router]);
+
+  if (!user) return null;
 
   const handleSubmit = async (data: Parameters<typeof createToilet>[0]) => {
     if (!selectedLocation) {

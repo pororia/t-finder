@@ -1,4 +1,5 @@
 'use client';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
@@ -23,10 +24,11 @@ export default function MyPage() {
     enabled: !!user,
   });
 
-  if (!user) {
-    router.push('/login');
-    return null;
-  }
+  useEffect(() => {
+    if (!user) router.push('/login');
+  }, [user, router]);
+
+  if (!user) return null;
 
   const handleLogout = async () => {
     await logout();
