@@ -16,6 +16,7 @@ export default function NewToiletPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [autoAddress, setAutoAddress] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
   const { isLoaded } = useJsApiLoader({
@@ -26,6 +27,20 @@ export default function NewToiletPage() {
   useEffect(() => {
     if (!user) router.push('/login');
   }, [user, router]);
+
+  const handleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
+    if (!e.latLng) return;
+    const lat = e.latLng.lat();
+    const lng = e.latLng.lng();
+    setSelectedLocation({ lat, lng });
+
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status === 'OK' && results && results[0]) {
+        setAutoAddress(results[0].formatted_address);
+      }
+    });
+  }, []);
 
   if (!user) return null;
 
@@ -57,9 +72,7 @@ export default function NewToiletPage() {
               mapContainerStyle={{ width: '100%', height: '100%' }}
               center={selectedLocation || DEFAULT_CENTER}
               zoom={15}
-              onClick={(e) => {
-                if (e.latLng) setSelectedLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-              }}
+              onClick={handleMapClick}
               options={{ disableDefaultUI: true, zoomControl: true }}
             >
               {selectedLocation && <Marker position={selectedLocation} />}
@@ -76,7 +89,12 @@ export default function NewToiletPage() {
 
         <div className="px-4 py-6">
           <h1 className="text-xl font-bold text-gray-900 mb-6">화장실 등록</h1>
-          <ToiletForm onSubmit={handleSubmit} isLoading={isLoading} selectedLocation={selectedLocation || undefined} />
+          <ToiletForm
+            onSubmit={handleSubmit}
+            isLoading={isLoading}
+            selectedLocation={selectedLocation || undefined}
+            autoAddress={autoAddress}
+          />
         </div>
       </main>
       <BottomNav />

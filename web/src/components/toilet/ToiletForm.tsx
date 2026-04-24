@@ -1,4 +1,5 @@
 'use client';
+import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -35,9 +36,10 @@ interface Props {
   onSubmit: (data: FormData) => Promise<void>;
   isLoading?: boolean;
   selectedLocation?: { lat: number; lng: number };
+  autoAddress?: string;
 }
 
-export function ToiletForm({ defaultValues, onSubmit, isLoading, selectedLocation }: Props) {
+export function ToiletForm({ defaultValues, onSubmit, isLoading, selectedLocation, autoAddress }: Props) {
   const {
     register,
     handleSubmit,
@@ -66,6 +68,10 @@ export function ToiletForm({ defaultValues, onSubmit, isLoading, selectedLocatio
   if (selectedLocation) {
     setValue('location', selectedLocation);
   }
+
+  useEffect(() => {
+    if (autoAddress) setValue('address', autoAddress);
+  }, [autoAddress, setValue]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
