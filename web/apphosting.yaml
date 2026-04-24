@@ -26,3 +26,18 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyCUOWF2xxuPwnKBIUhFvl1l9NlKH8x2-Yg
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "848358983898"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: 1:848358983898:web:4749e35ead695d4dacbde3
+    availability:
+      - BUILD
+      - RUNTIME
