@@ -7,7 +7,6 @@ import { ToiletCard } from '@/components/toilet/ToiletCard';
 import { Header } from '@/components/common/Header';
 import { BottomNav } from '@/components/common/BottomNav';
 import { Spinner } from '@/components/common/Spinner';
-import type { ToiletNearby } from '@/types/toilet';
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
@@ -48,7 +47,7 @@ export default function SearchPage() {
         )}
 
         <div className="space-y-3">
-          {results.map((toilet: ToiletNearby) => (
+          {results.map((toilet) => (
             <ToiletCard key={toilet.id} toilet={toilet} showDistance={false} />
           ))}
           {!isLoading && searchQuery && results.length === 0 && (
