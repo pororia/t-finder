@@ -5,10 +5,10 @@ import { MapPin, Lock, Accessibility, DollarSign } from 'lucide-react';
 import { CleanlinessRating } from './CleanlinessRating';
 import { formatDistance } from '@/lib/utils/distance';
 import { formatPaymentType } from '@/lib/utils/format';
-import type { ToiletNearby } from '@/types/toilet';
+import type { Toilet, ToiletNearby } from '@/types/toilet';
 
 interface Props {
-  toilet: ToiletNearby;
+  toilet: Toilet | ToiletNearby;
   showDistance?: boolean;
 }
 
@@ -16,7 +16,7 @@ export function ToiletCard({ toilet, showDistance = true }: Props) {
   return (
     <Link href={`/toilets/${toilet.id}`} className="block bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow p-4">
       <div className="flex gap-3">
-        {toilet.thumbnail_url ? (
+        {'thumbnail_url' in toilet && toilet.thumbnail_url ? (
           <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
             <Image src={toilet.thumbnail_url} alt="화장실 사진" fill className="object-cover" />
           </div>
@@ -45,7 +45,7 @@ export function ToiletCard({ toilet, showDistance = true }: Props) {
               <DollarSign className="w-3 h-3" /> {formatPaymentType(toilet.payment_type, toilet.cost)}
             </span>
           </div>
-          {showDistance && (
+          {showDistance && 'distance_m' in toilet && (
             <p className="mt-1 text-sm text-gray-500 flex items-center gap-1">
               <MapPin className="w-3 h-3" />
               {formatDistance(toilet.distance_m)}
