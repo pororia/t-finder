@@ -41,3 +41,8 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  - variable: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    value: AIzaSyBjGMHZrON2UivvRSl_DKskixspi2F_H-s
+    availability:
+      - BUILD
+      - RUNTIME
