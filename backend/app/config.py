@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from typing import List, Optional
 
@@ -7,8 +8,6 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/v1"
 
     DATABASE_URL: str = "postgresql+asyncpg://tfinder:tfinder_dev_password@localhost:5432/tfinder"
-    # Cloud Run에서 Cloud SQL 연결 시 설정 (예: project:region:instance)
-    # 설정되면 DATABASE_URL의 host 대신 Unix 소켓으로 연결
     CLOUD_SQL_INSTANCE: Optional[str] = None
 
     JWT_SECRET_KEY: str = "dev_secret_key"
@@ -22,6 +21,13 @@ class Settings(BaseSettings):
     PASSWORD_ENCRYPTION_KEY: str = ""
 
     CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8081"]
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v):
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(",")]
+        return v
 
     class Config:
         env_file = ".env"
