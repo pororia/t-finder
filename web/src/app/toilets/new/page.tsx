@@ -81,9 +81,13 @@ export default function NewToiletPage() {
             <div className="h-full flex items-center justify-center text-gray-500">지도 로딩 중...</div>
           )}
         </div>
-        {!selectedLocation && (
+        {!selectedLocation ? (
           <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-sm text-amber-700 text-center">
             지도를 클릭해서 화장실 위치를 선택하세요
+          </div>
+        ) : (
+          <div className="bg-green-50 border-b border-green-200 px-4 py-2 text-sm text-green-700 text-center">
+            위도 {selectedLocation.lat.toFixed(6)} / 경도 {selectedLocation.lng.toFixed(6)}
           </div>
         )}
 

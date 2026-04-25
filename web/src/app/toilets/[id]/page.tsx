@@ -124,8 +124,11 @@ export default function ToiletDetailPage() {
             <p className="text-gray-700 bg-gray-50 rounded-xl p-4">{toilet.description}</p>
           )}
 
-          {/* 등록일 */}
-          <p className="text-xs text-gray-400">등록일: {formatDate(toilet.created_at)}</p>
+          {/* 등록일 및 좌표 */}
+          <div className="text-xs text-gray-400 space-y-0.5">
+            <p>등록일: {formatDate(toilet.created_at)}</p>
+            <p>위도 {toilet.location.lat.toFixed(6)} / 경도 {toilet.location.lng.toFixed(6)}</p>
+          </div>
 
           {/* 액션 버튼 */}
           <div className="flex gap-3">
