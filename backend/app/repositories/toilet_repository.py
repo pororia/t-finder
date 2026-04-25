@@ -1,4 +1,4 @@
-from sqlalchemy import select, func
+from sqlalchemy import select, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from geoalchemy2.functions import ST_DWithin, ST_Distance, ST_SetSRID, ST_MakePoint, ST_X, ST_Y, ST_AsGeoJSON
@@ -42,21 +42,20 @@ class ToiletRepository:
                 Toilet.is_deleted == False,
                 ST_DWithin(Toilet.location, point.cast("geography"), radius_m),
             )
-            .order_by("distance_m")
+            .order_by(text("distance_m"))
             .limit(limit)
         )
         result = await self.db.execute(query)
         return result.all()
 
     async def find_in_bounds(self, min_lat: float, min_lng: float, max_lat: float, max_lng: float) -> List[Toilet]:
-        from geoalchemy2.functions import ST_MakeEnvelope
-        envelope = ST_MakeEnvelope(min_lng, min_lat, max_lng, max_lat, 4326).cast("geography")
+        envelope = func.ST_MakeEnvelope(min_lng, min_lat, max_lng, max_lat, 4326)
         result = await self.db.execute(
             select(Toilet)
             .options(selectinload(Toilet.photos))
             .where(
                 Toilet.is_deleted == False,
-                Toilet.location.ST_Intersects(envelope),
+                func.ST_Intersects(Toilet.location, envelope),
             )
             .limit(200)
         )
