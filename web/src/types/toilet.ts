@@ -23,6 +23,9 @@ export interface Toilet {
   is_accessible: boolean;
   seat_count: number;
   urinal_count: number;
+  male_seat_count: number;
+  male_urinal_count: number;
+  female_seat_count: number;
   payment_type: 'FREE' | 'PAID';
   cost: number | null;
   photos: Photo[];

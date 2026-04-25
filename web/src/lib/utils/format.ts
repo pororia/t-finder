@@ -9,8 +9,8 @@ export function formatRelativeDate(dateString: string): string {
   return formatDistanceToNow(new Date(dateString), { addSuffix: true, locale: ko });
 }
 
-export function formatCost(cost: number | null): string {
-  if (cost === null || cost === 0) return '무료';
+export function formatCost(cost: number | null | undefined): string {
+  if (cost == null || cost === 0) return '무료';
   return `${cost.toLocaleString()}원`;
 }
 

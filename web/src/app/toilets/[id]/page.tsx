@@ -112,11 +112,36 @@ export default function ToiletDetailPage() {
           )}
 
           {/* 변기 수 */}
-          {(toilet.seat_count > 0 || toilet.urinal_count > 0) && (
-            <div className="bg-gray-50 rounded-xl p-4 grid grid-cols-2 gap-4 text-center">
-              <div><p className="text-2xl font-bold">{toilet.seat_count}</p><p className="text-sm text-gray-500">좌변기</p></div>
-              <div><p className="text-2xl font-bold">{toilet.urinal_count}</p><p className="text-sm text-gray-500">소변기</p></div>
-            </div>
+          {toilet.is_unisex ? (
+            (toilet.seat_count > 0 || toilet.urinal_count > 0) && (
+              <div className="bg-gray-50 rounded-xl p-4 grid grid-cols-2 gap-4 text-center">
+                <div><p className="text-2xl font-bold">{toilet.seat_count}</p><p className="text-sm text-gray-500">좌변기 (공용)</p></div>
+                <div><p className="text-2xl font-bold">{toilet.urinal_count}</p><p className="text-sm text-gray-500">소변기 (공용)</p></div>
+              </div>
+            )
+          ) : (
+            (toilet.male_seat_count > 0 || toilet.male_urinal_count > 0 || toilet.female_seat_count > 0) && (
+              <div className="space-y-2">
+                {(toilet.male_seat_count > 0 || toilet.male_urinal_count > 0) && (
+                  <div className="bg-blue-50 rounded-xl p-4">
+                    <p className="text-sm font-medium text-blue-800 mb-2">🚹 남자 화장실</p>
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                      <div><p className="text-xl font-bold text-blue-900">{toilet.male_seat_count}</p><p className="text-xs text-gray-500">좌변기</p></div>
+                      <div><p className="text-xl font-bold text-blue-900">{toilet.male_urinal_count}</p><p className="text-xs text-gray-500">소변기</p></div>
+                    </div>
+                  </div>
+                )}
+                {toilet.female_seat_count > 0 && (
+                  <div className="bg-pink-50 rounded-xl p-4">
+                    <p className="text-sm font-medium text-pink-800 mb-2">🚺 여자 화장실</p>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-pink-900">{toilet.female_seat_count}</p>
+                      <p className="text-xs text-gray-500">좌변기</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
           )}
 
           {/* 설명 */}

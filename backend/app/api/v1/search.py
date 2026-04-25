@@ -66,8 +66,12 @@ async def in_bounds_toilets(
             "location": location_to_dict(t.location),
             "is_unisex": t.is_unisex,
             "is_accessible": t.is_accessible,
-            "payment_type": str(t.payment_type),
+            "payment_type": t.payment_type.value if hasattr(t.payment_type, 'value') else str(t.payment_type),
+            "cost": t.cost,
             "has_password": t.has_password,
+            "male_seat_count": t.male_seat_count,
+            "male_urinal_count": t.male_urinal_count,
+            "female_seat_count": t.female_seat_count,
         }
         for t in toilets
     ]

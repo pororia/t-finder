@@ -19,6 +19,9 @@ const toiletSchema = z.object({
   is_accessible: z.boolean(),
   seat_count: z.number().int().min(0),
   urinal_count: z.number().int().min(0),
+  male_seat_count: z.number().int().min(0),
+  male_urinal_count: z.number().int().min(0),
+  female_seat_count: z.number().int().min(0),
   payment_type: z.enum(['FREE', 'PAID']),
   cost: z.number().int().min(0).optional(),
 }).refine((d) => !d.has_password || !!d.password_value, {
@@ -56,6 +59,9 @@ export function ToiletForm({ defaultValues, onSubmit, isLoading, selectedLocatio
       is_accessible: false,
       seat_count: 0,
       urinal_count: 0,
+      male_seat_count: 0,
+      male_urinal_count: 0,
+      female_seat_count: 0,
       payment_type: 'FREE',
       location: selectedLocation || { lat: 0, lng: 0 },
       ...defaultValues,
@@ -64,6 +70,7 @@ export function ToiletForm({ defaultValues, onSubmit, isLoading, selectedLocatio
 
   const hasPassword = watch('has_password');
   const paymentType = watch('payment_type');
+  const isUnisex = watch('is_unisex');
 
   if (selectedLocation) {
     setValue('location', selectedLocation);
@@ -121,27 +128,47 @@ export function ToiletForm({ defaultValues, onSubmit, isLoading, selectedLocatio
         </div>
       </div>
 
-      {/* 좌변기/소변기 */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">좌변기 수</label>
-          <input
-            type="number"
-            min={0}
-            {...register('seat_count', { valueAsNumber: true })}
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1F4E79]"
-          />
+      {/* 변기 수 */}
+      {isUnisex ? (
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">좌변기 수 (공용)</label>
+            <input type="number" min={0} {...register('seat_count', { valueAsNumber: true })}
+              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1F4E79]" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">소변기 수 (공용)</label>
+            <input type="number" min={0} {...register('urinal_count', { valueAsNumber: true })}
+              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1F4E79]" />
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">소변기 수</label>
-          <input
-            type="number"
-            min={0}
-            {...register('urinal_count', { valueAsNumber: true })}
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1F4E79]"
-          />
+      ) : (
+        <div className="space-y-3">
+          <div className="bg-blue-50 rounded-lg p-3">
+            <p className="text-sm font-medium text-blue-800 mb-2">🚹 남자 화장실</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">좌변기 수</label>
+                <input type="number" min={0} {...register('male_seat_count', { valueAsNumber: true })}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">소변기 수</label>
+                <input type="number" min={0} {...register('male_urinal_count', { valueAsNumber: true })}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-pink-50 rounded-lg p-3">
+            <p className="text-sm font-medium text-pink-800 mb-2">🚺 여자 화장실</p>
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">좌변기 수</label>
+              <input type="number" min={0} {...register('female_seat_count', { valueAsNumber: true })}
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400" />
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 비용 */}
       <div>

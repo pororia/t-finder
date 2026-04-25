@@ -22,6 +22,9 @@ class ToiletCreate(BaseModel):
     is_accessible: bool = False
     seat_count: int = Field(0, ge=0)
     urinal_count: int = Field(0, ge=0)
+    male_seat_count: int = Field(0, ge=0)
+    male_urinal_count: int = Field(0, ge=0)
+    female_seat_count: int = Field(0, ge=0)
     payment_type: str = Field("FREE", pattern="^(FREE|PAID)$")
     cost: Optional[int] = Field(None, ge=0)
 
@@ -46,6 +49,9 @@ class ToiletUpdate(BaseModel):
     is_accessible: Optional[bool] = None
     seat_count: Optional[int] = Field(None, ge=0)
     urinal_count: Optional[int] = Field(None, ge=0)
+    male_seat_count: Optional[int] = Field(None, ge=0)
+    male_urinal_count: Optional[int] = Field(None, ge=0)
+    female_seat_count: Optional[int] = Field(None, ge=0)
     payment_type: Optional[str] = Field(None, pattern="^(FREE|PAID)$")
     cost: Optional[int] = Field(None, ge=0)
 
@@ -73,6 +79,9 @@ class ToiletResponse(BaseModel):
     is_accessible: bool
     seat_count: int
     urinal_count: int
+    male_seat_count: int = 0
+    male_urinal_count: int = 0
+    female_seat_count: int = 0
     payment_type: str
     cost: Optional[int]
     photos: List[PhotoInfo] = []
