@@ -49,7 +49,7 @@ class ToiletRepository:
         return result.all()
 
     async def find_in_bounds(self, min_lat: float, min_lng: float, max_lat: float, max_lng: float) -> List[Toilet]:
-        envelope = func.ST_MakeEnvelope(min_lng, min_lat, max_lng, max_lat, 4326)
+        envelope = func.ST_MakeEnvelope(min_lng, min_lat, max_lng, max_lat, 4326).cast("geography")
         result = await self.db.execute(
             select(Toilet)
             .options(selectinload(Toilet.photos))
