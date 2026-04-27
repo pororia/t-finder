@@ -1,6 +1,7 @@
 -- ENUM 타입
 CREATE TYPE user_role AS ENUM ('USER', 'ADMIN');
 CREATE TYPE payment_type AS ENUM ('FREE', 'PAID');
+CREATE TYPE toilet_type AS ENUM ('간이', '개방', '공중', '이동');
 
 -- users 테이블
 CREATE TABLE users (
@@ -21,25 +22,43 @@ CREATE INDEX idx_users_email ON users(email);
 
 -- toilets 테이블
 CREATE TABLE toilets (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    location        GEOGRAPHY(POINT, 4326) NOT NULL,
-    address         VARCHAR(500) NOT NULL,
-    address_detail  VARCHAR(200),
-    name            VARCHAR(200),
-    cleanliness     SMALLINT NOT NULL CHECK (cleanliness BETWEEN 1 AND 5),
-    description     TEXT,
-    has_password    BOOLEAN NOT NULL DEFAULT FALSE,
-    password_value  VARCHAR(100),
-    is_unisex       BOOLEAN NOT NULL DEFAULT FALSE,
-    is_accessible   BOOLEAN NOT NULL DEFAULT FALSE,
-    seat_count      SMALLINT NOT NULL DEFAULT 0 CHECK (seat_count >= 0),
-    urinal_count    SMALLINT NOT NULL DEFAULT 0 CHECK (urinal_count >= 0),
-    payment_type    payment_type NOT NULL DEFAULT 'FREE',
-    cost            INTEGER CHECK (cost IS NULL OR cost >= 0),
-    created_by      UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-    is_deleted      BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    id                          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    toilet_type                 toilet_type,
+    location                    GEOGRAPHY(POINT, 4326) NOT NULL,
+    address                     VARCHAR(500) NOT NULL,
+    address_jibun               VARCHAR(500),
+    address_detail              VARCHAR(200),
+    name                        VARCHAR(200),
+    cleanliness                 SMALLINT NOT NULL CHECK (cleanliness BETWEEN 1 AND 5),
+    description                 TEXT,
+    has_password                BOOLEAN NOT NULL DEFAULT FALSE,
+    password_value              VARCHAR(100),
+    is_unisex                   BOOLEAN NOT NULL DEFAULT FALSE,
+    is_accessible               BOOLEAN NOT NULL DEFAULT FALSE,
+    seat_count                  SMALLINT NOT NULL DEFAULT 0 CHECK (seat_count >= 0),
+    urinal_count                SMALLINT NOT NULL DEFAULT 0 CHECK (urinal_count >= 0),
+    male_seat_count             SMALLINT NOT NULL DEFAULT 0,
+    male_urinal_count           SMALLINT NOT NULL DEFAULT 0,
+    male_disabled_seat_count    SMALLINT NOT NULL DEFAULT 0,
+    male_disabled_urinal_count  SMALLINT NOT NULL DEFAULT 0,
+    male_children_seat_count    SMALLINT NOT NULL DEFAULT 0,
+    male_children_urinal_count  SMALLINT NOT NULL DEFAULT 0,
+    female_seat_count           SMALLINT NOT NULL DEFAULT 0,
+    female_disabled_seat_count  SMALLINT NOT NULL DEFAULT 0,
+    female_children_seat_count  SMALLINT NOT NULL DEFAULT 0,
+    open_hours                  VARCHAR(200),
+    has_emergency_bell          BOOLEAN NOT NULL DEFAULT FALSE,
+    emergency_bell_location     VARCHAR(200),
+    has_entrance_cctv           BOOLEAN NOT NULL DEFAULT FALSE,
+    has_diaper_table            BOOLEAN NOT NULL DEFAULT FALSE,
+    diaper_table_location       VARCHAR(200),
+    remodeling_date             VARCHAR(7),
+    payment_type                payment_type NOT NULL DEFAULT 'FREE',
+    cost                        INTEGER CHECK (cost IS NULL OR cost >= 0),
+    created_by                  UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    is_deleted                  BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at                  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at                  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT chk_cost_required CHECK (
         (payment_type = 'FREE' AND cost IS NULL) OR
         (payment_type = 'PAID' AND cost IS NOT NULL)

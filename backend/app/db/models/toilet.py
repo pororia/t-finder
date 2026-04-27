@@ -13,12 +13,21 @@ class PaymentType(str, enum.Enum):
     PAID = "PAID"
 
 
+class ToiletType(str, enum.Enum):
+    SIMPLE = "간이"
+    OPEN = "개방"
+    PUBLIC = "공중"
+    MOBILE = "이동"
+
+
 class Toilet(Base):
     __tablename__ = "toilets"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    toilet_type = Column(Enum(ToiletType, name="toilet_type", create_type=False), nullable=True)
     location = Column(Geography(geometry_type="POINT", srid=4326), nullable=False)
     address = Column(String(500), nullable=False)
+    address_jibun = Column(String(500), nullable=True)
     address_detail = Column(String(200), nullable=True)
     name = Column(String(200), nullable=True)
     cleanliness = Column(SmallInteger, nullable=False)
@@ -31,7 +40,20 @@ class Toilet(Base):
     urinal_count = Column(SmallInteger, nullable=False, default=0)
     male_seat_count = Column(SmallInteger, nullable=False, default=0)
     male_urinal_count = Column(SmallInteger, nullable=False, default=0)
+    male_disabled_seat_count = Column(SmallInteger, nullable=False, default=0)
+    male_disabled_urinal_count = Column(SmallInteger, nullable=False, default=0)
+    male_children_seat_count = Column(SmallInteger, nullable=False, default=0)
+    male_children_urinal_count = Column(SmallInteger, nullable=False, default=0)
     female_seat_count = Column(SmallInteger, nullable=False, default=0)
+    female_disabled_seat_count = Column(SmallInteger, nullable=False, default=0)
+    female_children_seat_count = Column(SmallInteger, nullable=False, default=0)
+    open_hours = Column(String(200), nullable=True)
+    has_emergency_bell = Column(Boolean, nullable=False, default=False)
+    emergency_bell_location = Column(String(200), nullable=True)
+    has_entrance_cctv = Column(Boolean, nullable=False, default=False)
+    has_diaper_table = Column(Boolean, nullable=False, default=False)
+    diaper_table_location = Column(String(200), nullable=True)
+    remodeling_date = Column(String(7), nullable=True)
     payment_type = Column(Enum(PaymentType, name="payment_type", create_type=False), nullable=False, default=PaymentType.FREE)
     cost = Column(Integer, nullable=True)
     created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)

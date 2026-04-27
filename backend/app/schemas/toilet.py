@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import Optional, List
 from uuid import UUID
 from datetime import datetime
+import re
 
 
 class LocationSchema(BaseModel):
@@ -10,8 +11,10 @@ class LocationSchema(BaseModel):
 
 
 class ToiletCreate(BaseModel):
+    toilet_type: Optional[str] = Field(None, pattern="^(간이|개방|공중|이동)$")
     location: LocationSchema
     address: str = Field(..., max_length=500)
+    address_jibun: Optional[str] = Field(None, max_length=500)
     address_detail: Optional[str] = Field(None, max_length=200)
     name: Optional[str] = Field(None, max_length=200)
     cleanliness: int = Field(..., ge=1, le=5)
@@ -24,7 +27,20 @@ class ToiletCreate(BaseModel):
     urinal_count: int = Field(0, ge=0)
     male_seat_count: int = Field(0, ge=0)
     male_urinal_count: int = Field(0, ge=0)
+    male_disabled_seat_count: int = Field(0, ge=0)
+    male_disabled_urinal_count: int = Field(0, ge=0)
+    male_children_seat_count: int = Field(0, ge=0)
+    male_children_urinal_count: int = Field(0, ge=0)
     female_seat_count: int = Field(0, ge=0)
+    female_disabled_seat_count: int = Field(0, ge=0)
+    female_children_seat_count: int = Field(0, ge=0)
+    open_hours: Optional[str] = Field(None, max_length=200)
+    has_emergency_bell: bool = False
+    emergency_bell_location: Optional[str] = Field(None, max_length=200)
+    has_entrance_cctv: bool = False
+    has_diaper_table: bool = False
+    diaper_table_location: Optional[str] = Field(None, max_length=200)
+    remodeling_date: Optional[str] = Field(None, pattern=r"^\d{4}-(0[1-9]|1[0-2])$")
     payment_type: str = Field("FREE", pattern="^(FREE|PAID)$")
     cost: Optional[int] = Field(None, ge=0)
 
@@ -38,7 +54,9 @@ class ToiletCreate(BaseModel):
 
 
 class ToiletUpdate(BaseModel):
+    toilet_type: Optional[str] = Field(None, pattern="^(간이|개방|공중|이동)$")
     address: Optional[str] = Field(None, max_length=500)
+    address_jibun: Optional[str] = Field(None, max_length=500)
     address_detail: Optional[str] = Field(None, max_length=200)
     name: Optional[str] = Field(None, max_length=200)
     cleanliness: Optional[int] = Field(None, ge=1, le=5)
@@ -51,7 +69,20 @@ class ToiletUpdate(BaseModel):
     urinal_count: Optional[int] = Field(None, ge=0)
     male_seat_count: Optional[int] = Field(None, ge=0)
     male_urinal_count: Optional[int] = Field(None, ge=0)
+    male_disabled_seat_count: Optional[int] = Field(None, ge=0)
+    male_disabled_urinal_count: Optional[int] = Field(None, ge=0)
+    male_children_seat_count: Optional[int] = Field(None, ge=0)
+    male_children_urinal_count: Optional[int] = Field(None, ge=0)
     female_seat_count: Optional[int] = Field(None, ge=0)
+    female_disabled_seat_count: Optional[int] = Field(None, ge=0)
+    female_children_seat_count: Optional[int] = Field(None, ge=0)
+    open_hours: Optional[str] = Field(None, max_length=200)
+    has_emergency_bell: Optional[bool] = None
+    emergency_bell_location: Optional[str] = Field(None, max_length=200)
+    has_entrance_cctv: Optional[bool] = None
+    has_diaper_table: Optional[bool] = None
+    diaper_table_location: Optional[str] = Field(None, max_length=200)
+    remodeling_date: Optional[str] = Field(None, pattern=r"^\d{4}-(0[1-9]|1[0-2])$")
     payment_type: Optional[str] = Field(None, pattern="^(FREE|PAID)$")
     cost: Optional[int] = Field(None, ge=0)
 
@@ -67,8 +98,10 @@ class PhotoInfo(BaseModel):
 
 class ToiletResponse(BaseModel):
     id: UUID
+    toilet_type: Optional[str] = None
     location: LocationSchema
     address: str
+    address_jibun: Optional[str] = None
     address_detail: Optional[str]
     name: Optional[str]
     cleanliness: int
@@ -81,7 +114,20 @@ class ToiletResponse(BaseModel):
     urinal_count: int
     male_seat_count: int = 0
     male_urinal_count: int = 0
+    male_disabled_seat_count: int = 0
+    male_disabled_urinal_count: int = 0
+    male_children_seat_count: int = 0
+    male_children_urinal_count: int = 0
     female_seat_count: int = 0
+    female_disabled_seat_count: int = 0
+    female_children_seat_count: int = 0
+    open_hours: Optional[str] = None
+    has_emergency_bell: bool = False
+    emergency_bell_location: Optional[str] = None
+    has_entrance_cctv: bool = False
+    has_diaper_table: bool = False
+    diaper_table_location: Optional[str] = None
+    remodeling_date: Optional[str] = None
     payment_type: str
     cost: Optional[int]
     photos: List[PhotoInfo] = []
