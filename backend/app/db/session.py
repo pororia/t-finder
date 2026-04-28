@@ -1,22 +1,26 @@
 import logging
+from sqlalchemy import event
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from app.config import settings
 
 logger = logging.getLogger(__name__)
 
 
-async def _init_connection(conn):
+def _register_geography_codecs(dbapi_connection, connection_record):
+    """asyncpg connection 이벤트에서 PostGIS geography/geometry 타입 코덱 등록."""
+    asyncpg_conn = dbapi_connection.driver_connection
     for type_name in ("geography", "geometry"):
         try:
-            await conn.set_type_codec(
-                type_name, encoder=str, decoder=str, format="text", schema="public"
+            dbapi_connection.await_(
+                asyncpg_conn.set_type_codec(
+                    type_name, encoder=str, decoder=str, format="text", schema="public"
+                )
             )
-            logger.debug("Registered asyncpg codec for %s", type_name)
         except Exception as e:
-            logger.error("Failed to register asyncpg codec for %s: %r", type_name, e)
+            logger.warning("PostGIS codec registration failed for %s: %s", type_name, e)
 
 
-_connect_args: dict = {"init": _init_connection}
+_connect_args: dict = {}
 if settings.CLOUD_SQL_INSTANCE:
     # Cloud Run → Cloud SQL Unix 소켓 연결
     _connect_args["server_settings"] = {}
@@ -28,6 +32,8 @@ engine = create_async_engine(
     pool_pre_ping=True,
     connect_args=_connect_args,
 )
+event.listen(engine.sync_engine, "connect", _register_geography_codecs)
+
 AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
