@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
@@ -5,6 +6,8 @@ from app.services.toilet_service import ToiletService
 from app.schemas.common import APIResponse
 from app.repositories.toilet_repository import ToiletRepository
 from app.utils.geo import location_to_dict
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -56,7 +59,7 @@ async def in_bounds_toilets(
     db: AsyncSession = Depends(get_db),
 ):
     from sqlalchemy import text
-    # ST_X/ST_Y로 geography를 float 으로 직접 추출 → asyncpg geography 디코딩 우회
+    logger.info("in_bounds called: lat[%s-%s] lng[%s-%s]", min_lat, max_lat, min_lng, max_lng)
     rows = (
         await db.execute(
             text("""
@@ -89,6 +92,7 @@ async def in_bounds_toilets(
             },
         )
     ).mappings().all()
+    logger.info("in_bounds returned %d rows", len(rows))
 
     result = [
         {
