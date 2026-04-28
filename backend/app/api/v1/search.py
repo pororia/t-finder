@@ -59,7 +59,6 @@ async def in_bounds_toilets(
     db: AsyncSession = Depends(get_db),
 ):
     from sqlalchemy import text
-    logger.info("in_bounds called: lat[%s-%s] lng[%s-%s]", min_lat, max_lat, min_lng, max_lng)
     rows = (
         await db.execute(
             text("""
@@ -80,19 +79,16 @@ async def in_bounds_toilets(
                     female_seat_count
                 FROM toilets
                 WHERE is_deleted = FALSE
-                  AND ST_Intersects(
-                        location,
-                        ST_MakeEnvelope(:min_lng, :min_lat, :max_lng, :max_lat, 4326)::geography
-                      )
+                  AND ST_Y(location::geometry) BETWEEN :min_lat AND :max_lat
+                  AND ST_X(location::geometry) BETWEEN :min_lng AND :max_lng
                 LIMIT 200
             """),
             {
-                "min_lng": min_lng, "min_lat": min_lat,
-                "max_lng": max_lng, "max_lat": max_lat,
+                "min_lat": min_lat, "max_lat": max_lat,
+                "min_lng": min_lng, "max_lng": max_lng,
             },
         )
     ).mappings().all()
-    logger.info("in_bounds returned %d rows", len(rows))
 
     result = [
         {
