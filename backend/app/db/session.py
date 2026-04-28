@@ -1,10 +1,19 @@
+import logging
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from app.config import settings
 
+logger = logging.getLogger(__name__)
+
 
 async def _init_connection(conn):
-    await conn.set_type_codec("geography", encoder=str, decoder=str, format="text", schema="public")
-    await conn.set_type_codec("geometry", encoder=str, decoder=str, format="text", schema="public")
+    for type_name in ("geography", "geometry"):
+        try:
+            await conn.set_type_codec(
+                type_name, encoder=str, decoder=str, format="text", schema="public"
+            )
+            logger.debug("Registered asyncpg codec for %s", type_name)
+        except Exception as e:
+            logger.error("Failed to register asyncpg codec for %s: %r", type_name, e)
 
 
 _connect_args: dict = {"init": _init_connection}
