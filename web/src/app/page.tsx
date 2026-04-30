@@ -1,7 +1,7 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { ToiletMap } from '@/components/map/GoogleMapComponent';
 import { MapSearchBar } from '@/components/map/MapSearchBar';
 import { CurrentLocationButton } from '@/components/map/CurrentLocationButton';
@@ -19,15 +19,38 @@ export default function HomePage() {
 
   const [bounds, setBounds] = useState<{ minLat: number; minLng: number; maxLat: number; maxLng: number } | null>(null);
   const [selectedToilet, setSelectedToilet] = useState<ToiletNearby | null>(null);
+  const [listOpen, setListOpen] = useState(false);
   const [mapCenter, setMapCenter] = useState(center);
+  const selectedRef = useRef<HTMLDivElement>(null);
 
   const { data: toilets = [] } = useInBoundsToilets(
     bounds?.minLat, bounds?.minLng, bounds?.maxLat, bounds?.maxLng
   );
 
+  const handleMarkerClick = useCallback((toilet: ToiletNearby) => {
+    setSelectedToilet(toilet);
+    setListOpen(true);
+  }, []);
+
+  const handleMapClick = useCallback(() => {
+    setListOpen(false);
+    setSelectedToilet(null);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setListOpen(false);
+    setSelectedToilet(null);
+  }, []);
+
   const handleLocate = useCallback((loc: { lat: number; lng: number }) => {
     setMapCenter(loc);
   }, []);
+
+  useEffect(() => {
+    if (listOpen && selectedRef.current) {
+      selectedRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [listOpen, selectedToilet]);
 
   return (
     <div className="h-screen flex flex-col">
@@ -42,17 +65,52 @@ export default function HomePage() {
         <ToiletMap
           center={mapCenter}
           toilets={toilets}
-          onMarkerClick={setSelectedToilet}
+          onMarkerClick={handleMarkerClick}
           onBoundsChange={setBounds}
+          onMapClick={handleMapClick}
           selectedMarker={selectedToilet?.id}
         />
       </div>
 
-      {/* 선택된 화장실 카드 */}
-      {selectedToilet && (
-        <div className="absolute bottom-20 left-4 right-4 z-20 animate-in slide-in-from-bottom">
-          <div onClick={() => setSelectedToilet(null)} className="absolute -top-2 right-2 bg-gray-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm cursor-pointer z-10">×</div>
-          <ToiletCard toilet={selectedToilet} showDistance />
+      {/* 하단 리스트 패널 */}
+      {listOpen && (
+        <div className="absolute bottom-16 left-0 right-0 z-20 bg-white rounded-t-2xl shadow-xl flex flex-col max-h-[60vh]">
+          {/* 헤더 */}
+          <div className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0">
+            <div className="w-10 h-1 bg-gray-300 rounded-full absolute left-1/2 -translate-x-1/2 top-2" />
+            <span className="font-semibold text-gray-800 mt-1">
+              주변 화장실{' '}
+              <span className="text-blue-600">{toilets.length}개</span>
+            </span>
+            <button
+              onClick={handleClose}
+              className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="닫기"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+
+          {/* 리스트 */}
+          <div className="overflow-y-auto flex-1 p-3 space-y-2">
+            {toilets.length === 0 ? (
+              <p className="text-center text-gray-400 py-8">이 지역에 화장실 정보가 없습니다.</p>
+            ) : (
+              toilets.map((toilet: ToiletNearby) => (
+                <div
+                  key={toilet.id}
+                  ref={toilet.id === selectedToilet?.id ? selectedRef : null}
+                  className={
+                    toilet.id === selectedToilet?.id
+                      ? 'ring-2 ring-blue-500 rounded-xl'
+                      : ''
+                  }
+                >
+                  <ToiletCard toilet={toilet} showDistance={false} />
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
 

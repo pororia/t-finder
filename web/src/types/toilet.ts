@@ -55,6 +55,7 @@ export interface Toilet {
 
 export interface ToiletNearby {
   id: string;
+  name: string | null;
   address: string;
   location: Location;
   cleanliness: number;
@@ -63,8 +64,8 @@ export interface ToiletNearby {
   payment_type: 'FREE' | 'PAID';
   cost: number | null;
   has_password: boolean;
-  thumbnail_url: string | null;
-  distance_m: number;
+  thumbnail_url?: string | null;
+  distance_m?: number;
 }
 
 export interface ToiletHistory {

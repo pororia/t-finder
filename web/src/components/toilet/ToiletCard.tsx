@@ -26,7 +26,10 @@ export function ToiletCard({ toilet, showDistance = true }: Props) {
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-900 truncate">{toilet.address}</p>
+          {'name' in toilet && toilet.name && (
+            <p className="font-semibold text-gray-900 truncate">{toilet.name}</p>
+          )}
+          <p className={`truncate ${'name' in toilet && toilet.name ? 'text-sm text-gray-500' : 'font-semibold text-gray-900'}`}>{toilet.address}</p>
           <div className="mt-1">
             <CleanlinessRating value={toilet.cleanliness} readOnly size="sm" />
           </div>
