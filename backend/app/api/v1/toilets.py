@@ -10,7 +10,6 @@ from app.services.toilet_service import ToiletService
 from app.schemas.toilet import ToiletCreate, ToiletUpdate, ToiletResponse, ToiletHistoryResponse
 from app.schemas.common import APIResponse
 from app.core.dependencies import get_current_user, get_current_user_optional
-from app.utils.geo import location_to_dict
 
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
@@ -69,36 +68,86 @@ async def get_toilet(
     db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user_optional),
 ):
-    service = ToiletService(db)
-    toilet = await service.get_toilet(str(toilet_id), current_user)
-    avg_rating = getattr(toilet, "_avg_rating", None)
-    review_count = getattr(toilet, "_review_count", 0)
-    decrypted_pw = getattr(toilet, "_decrypted_password", None)
+    from sqlalchemy import text
+    from app.core.exceptions import ToiletNotFoundException
+    from app.utils.encryption import decrypt_password
+
+    row = (await db.execute(
+        text("""
+            SELECT
+                id::text,
+                toilet_type::text AS toilet_type,
+                address, address_jibun, address_detail, name,
+                cleanliness, description,
+                has_password, password_value,
+                is_unisex, is_accessible,
+                seat_count, urinal_count,
+                male_seat_count, male_urinal_count,
+                male_disabled_seat_count, male_disabled_urinal_count,
+                male_children_seat_count, male_children_urinal_count,
+                female_seat_count, female_disabled_seat_count, female_children_seat_count,
+                open_hours,
+                has_emergency_bell, emergency_bell_location,
+                has_entrance_cctv, has_diaper_table, diaper_table_location,
+                remodeling_date,
+                payment_type::text AS payment_type,
+                cost,
+                created_by::text,
+                created_at, updated_at,
+                ST_Y(location::geometry) AS lat,
+                ST_X(location::geometry) AS lng
+            FROM toilets
+            WHERE id = :id AND is_deleted = FALSE
+        """),
+        {"id": str(toilet_id)},
+    )).mappings().one_or_none()
+
+    if not row:
+        raise ToiletNotFoundException()
+
+    photos = (await db.execute(
+        text("SELECT id::text, image_url, display_order FROM toilet_photos WHERE toilet_id = :id ORDER BY display_order"),
+        {"id": str(toilet_id)},
+    )).mappings().all()
+
+    rating_row = (await db.execute(
+        text("SELECT AVG(rating)::float AS avg_rating, COUNT(*)::int AS review_count FROM reviews WHERE toilet_id = :id"),
+        {"id": str(toilet_id)},
+    )).mappings().one()
+
+    decrypted_pw = None
+    if row["has_password"] and row["password_value"] and current_user:
+        try:
+            decrypted_pw = decrypt_password(row["password_value"])
+        except Exception:
+            pass
+
     result = {
-        "id": str(toilet.id),
-        "address": toilet.address,
-        "address_detail": toilet.address_detail,
-        "name": toilet.name,
-        "cleanliness": toilet.cleanliness,
-        "description": toilet.description,
-        "location": location_to_dict(toilet.location),
-        "has_password": toilet.has_password,
+        "id": row["id"],
+        "address": row["address"],
+        "address_jibun": row["address_jibun"],
+        "address_detail": row["address_detail"],
+        "name": row["name"],
+        "cleanliness": row["cleanliness"],
+        "description": row["description"],
+        "location": {"lat": float(row["lat"]), "lng": float(row["lng"])},
+        "has_password": row["has_password"],
         "password_value": decrypted_pw,
-        "is_unisex": toilet.is_unisex,
-        "is_accessible": toilet.is_accessible,
-        "seat_count": toilet.seat_count,
-        "urinal_count": toilet.urinal_count,
-        "male_seat_count": toilet.male_seat_count,
-        "male_urinal_count": toilet.male_urinal_count,
-        "female_seat_count": toilet.female_seat_count,
-        "payment_type": toilet.payment_type.value if hasattr(toilet.payment_type, 'value') else str(toilet.payment_type),
-        "cost": toilet.cost,
-        "avg_rating": avg_rating,
-        "review_count": review_count,
-        "photos": [{"id": str(p.id), "image_url": p.image_url, "display_order": p.display_order} for p in toilet.photos],
-        "created_by": str(toilet.created_by),
-        "created_at": toilet.created_at.isoformat(),
-        "updated_at": toilet.updated_at.isoformat(),
+        "is_unisex": row["is_unisex"],
+        "is_accessible": row["is_accessible"],
+        "seat_count": row["seat_count"],
+        "urinal_count": row["urinal_count"],
+        "male_seat_count": row["male_seat_count"],
+        "male_urinal_count": row["male_urinal_count"],
+        "female_seat_count": row["female_seat_count"],
+        "payment_type": row["payment_type"],
+        "cost": row["cost"],
+        "avg_rating": rating_row["avg_rating"],
+        "review_count": rating_row["review_count"],
+        "photos": [{"id": p["id"], "image_url": p["image_url"], "display_order": p["display_order"]} for p in photos],
+        "created_by": row["created_by"],
+        "created_at": row["created_at"].isoformat(),
+        "updated_at": row["updated_at"].isoformat(),
     }
     return APIResponse.ok(result)
 
