@@ -11,7 +11,7 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { useInBoundsToilets } from '@/hooks/useToilets';
 import type { ToiletNearby } from '@/types/toilet';
 
-const DEFAULT_CENTER = { lat: 37.5665, lng: 126.9780 };
+const DEFAULT_CENTER = { lat: 37.5960, lng: 126.8265 }; // 고양시 행주산성 일대 (Gyeonggi 데이터 있음)
 
 export default function HomePage() {
   const { location } = useGeolocation();
