@@ -48,7 +48,7 @@ export function ToiletCard({ toilet, showDistance = true }: Props) {
               <DollarSign className="w-3 h-3" /> {formatPaymentType(toilet.payment_type, toilet.cost)}
             </span>
           </div>
-          {showDistance && 'distance_m' in toilet && (
+          {showDistance && 'distance_m' in toilet && toilet.distance_m != null && (
             <p className="mt-1 text-sm text-gray-500 flex items-center gap-1">
               <MapPin className="w-3 h-3" />
               {formatDistance(toilet.distance_m)}
